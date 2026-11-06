@@ -1,0 +1,20 @@
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Local datasets
+data/raw/
+data/processed/
+
+# Generated ML artifacts
+models/*.pkl
+models/*.joblib
+
+# macOS
+.DS_Store
