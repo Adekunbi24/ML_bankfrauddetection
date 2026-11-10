@@ -24,3 +24,6 @@ models/*.joblib
 
 # Temporary logs
 *.log
+
+# Docker image archives
+*.tar.gz

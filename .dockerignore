@@ -1,0 +1,26 @@
+# Secrets and environment settings
+.env
+.env.*
+
+# Python environments
+.venv/
+.venv313/
+__pycache__/
+*.pyc
+
+# Git files
+.git/
+.gitignore
+
+# Large datasets
+# Exclude large datasets but include dashboard summaries
+data/raw/
+data/processed/
+*.csv
+
+# Temporary files
+*.log
+.DS_Store
+
+# Local development files
+.vscode/

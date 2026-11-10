@@ -1,4 +1,4 @@
-
+import json
 import os
 from pathlib import Path
 
@@ -30,6 +30,8 @@ MODEL_PATH = (
 
 FRAUD_THRESHOLD = 0.80
 
+DATA_SOURCE = os.getenv("DATA_SOURCE", "postgres")
+DASHBOARD_DATA_DIR = PROJECT_ROOT / "data" / "dashboard"
 
 # --------------------------------------------------
 # PostgreSQL connection
@@ -59,6 +61,19 @@ def get_connection_args():
 
 @st.cache_data(ttl=300)
 def get_transaction_metrics():
+
+    if DATA_SOURCE == "files":
+        file_path = DASHBOARD_DATA_DIR / "transaction_metrics.json"
+
+        with open(file_path, "r") as file:
+            metrics = json.load(file)
+
+        return (
+            int(metrics["total_transactions"]),
+            int(metrics["fraud_cases"]),
+            float(metrics["fraud_rate"]),
+        )
+
     query = """
         SELECT
             COUNT(*) AS total_transactions,
@@ -71,7 +86,11 @@ def get_transaction_metrics():
     with psycopg.connect(**get_connection_args()) as conn:
         with conn.cursor() as cur:
             cur.execute(query)
-            total_transactions, fraud_cases = cur.fetchone()
+            result = cur.fetchone()
+            if result is None:
+                total_transactions, fraud_cases = 0, 0
+            else:
+                total_transactions, fraud_cases = result
 
     fraud_rate = (
         fraud_cases / total_transactions * 100
@@ -84,6 +103,14 @@ def get_transaction_metrics():
 
 @st.cache_data(ttl=300)
 def get_transaction_type_stats():
+
+    if DATA_SOURCE == "files":
+        file_path = DASHBOARD_DATA_DIR / "transaction_type_stats.csv"
+
+        transaction_stats = pd.read_csv(file_path)
+
+        return transaction_stats
+
     query = """
         SELECT
             transaction_type,
@@ -111,8 +138,22 @@ def get_transaction_type_stats():
     )
 
 
+
 @st.cache_data(ttl=300)
 def get_fraud_amount_metrics():
+
+    if DATA_SOURCE == "files":
+        file_path = DASHBOARD_DATA_DIR / "fraud_amount_metrics.json"
+
+        with open(file_path, "r") as file:
+            metrics = json.load(file)
+
+        return (
+            float(metrics["total_fraud_amount"]),
+            float(metrics["average_fraud_amount"]),
+            float(metrics["average_nonfraud_amount"]),
+        )
+
     query = """
         SELECT
             COALESCE(
@@ -145,8 +186,15 @@ def get_fraud_amount_metrics():
     )
 
 
+
 @st.cache_data(ttl=300)
 def get_fraud_trends():
+
+    if DATA_SOURCE == "files":
+        file_path = DASHBOARD_DATA_DIR / "fraud_trends.csv"
+
+        return pd.read_csv(file_path)
+
     query = """
         SELECT
             step AS "Simulation Step",
@@ -170,6 +218,7 @@ def get_fraud_trends():
             "Fraud Cases",
         ],
     )
+
 
 
 # --------------------------------------------------
