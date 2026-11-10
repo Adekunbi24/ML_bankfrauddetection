@@ -18,3 +18,9 @@ models/*.joblib
 
 # macOS
 .DS_Store
+
+# Python 3.13 virtual environment
+.venv313/
+
+# Temporary logs
+*.log
